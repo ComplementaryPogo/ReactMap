@@ -45,7 +45,10 @@ function SelectorList({ category, subCategory, label, height = 400 }) {
     subCategory ? capitalize(subCategory) : ''
   }QuickSelect`
   const { available } = useGetAvailable(category)
-  const { t: tId } = useTranslateById({ quest: subCategory === 'pokemon' })
+  const { t: tId } = useTranslateById({
+    quest: subCategory === 'pokemon',
+    omitFormSuffix: true,
+  })
   const { t } = useTranslation()
   const allFilters = useMemory((s) => s.filters[category]?.filter)
 
@@ -56,6 +59,7 @@ function SelectorList({ category, subCategory, label, height = 400 }) {
   )
   const easyMode = useStorage((s) => !!s.filters[category]?.easyMode)
   const search = useStorage((s) => s.searches[searchKey] || '')
+  const disableGutters = !['pokemon', 'tappables'].includes(category)
 
   const translated = React.useMemo(
     () =>
@@ -92,6 +96,8 @@ function SelectorList({ category, subCategory, label, height = 400 }) {
               switch (category) {
                 case 'gyms':
                   return key.startsWith('t')
+                case 'tappables':
+                  return key.startsWith('q') && key !== 'q0'
                 default:
                   return Number.isInteger(Number(key.charAt(0)))
               }
@@ -133,7 +139,7 @@ function SelectorList({ category, subCategory, label, height = 400 }) {
   return (
     <List dense sx={{ width: '100%' }}>
       {translated.length > 10 && (
-        <ListItem disableGutters={category !== 'pokemon'}>
+        <ListItem disableGutters={disableGutters}>
           <GenericSearchMemo field={`searches.${searchKey}`} label={label} />
         </ListItem>
       )}
@@ -145,7 +151,7 @@ function SelectorList({ category, subCategory, label, height = 400 }) {
         />
       )}
       {!!items.length && (
-        <ListItem disableGutters={category !== 'pokemon'}>
+        <ListItem disableGutters={disableGutters}>
           <ListItemText>{t(search ? 'set_filtered' : 'set_all')}</ListItemText>
           <ButtonGroup variant="text" size="small" color="warning">
             <IconButton color="success" onClick={() => setAll('enable')}>
